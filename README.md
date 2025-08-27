@@ -90,13 +90,3 @@ We welcome contributions from everyone! If you'd like to improve this project or
     ```
 5. Open a pull request.
 
-
-## Contact 📧
-
-For any inquiries or feedback, feel free to reach out:
-
-- **GitHub**: notraman (https://github.com/notraman)
-             prasadmadhu123 (https://github.com/prasadmadhu123)
-- **Email**: iamramanbole@gmail.com
-
-Enjoy discovering movies with **Swipe Movies**! 🍿
