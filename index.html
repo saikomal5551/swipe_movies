@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Movies - Discover Your Next Movie</title>
+    <style>
+
+        
+        /* Movie Container Styles */
+.movie-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Ensures the cards are responsive */
+    gap: 7rem; /* Adds spacing between cards */
+    padding: 2rem;
+    margin-top: 4rem;
+    justify-items: center; /* Ensures cards are centered horizontally */
+}
+
+/* Add these styles to your existing CSS */
+
+.movie-poster {
+    position: relative;
+    overflow: hidden;
+}
+
+.movie-actions {
+    position: absolute;
+    bottom: -60px;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: space-around;
+    padding: 1rem;
+    transition: bottom 0.3s ease;
+}
+
+.movie-card:hover .movie-actions {
+    bottom: 0;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.action-btn:hover {
+    transform: scale(1.2);
+}
+
+.details-btn {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 1rem;
+    background-color: #7c3aed;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.details-btn:hover {
+    background-color: #6d28d9;
+}
+
+/* Modal Styles */
+.movie-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #1e293b;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #fff;
+}
+
+.modal-poster {
+    max-height: 300px;
+    margin: 1rem auto;
+    display: block;
+}
+
+.modal-details {
+    color: #fff;
+    line-height: 1.6;
+}
+
+.modal-details p {
+    margin: 0.5rem 0;
+}
+
+.modal-details strong {
+    color: #7c3aed;
+}
+
+/* Movie Card Styles */
+.movie-card {
+    background-color: #1e293b;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 100%; /* Ensure it fills its grid space */
+}
+
+/* Movie Card Image */
+.movie-card img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+/* Movie Card Content */
+.movie-card .movie-info {
+    padding: 1rem;
+}
+
+.movie-card .movie-info h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.movie-card .movie-info p {
+    font-size: 1rem;
+    color: #94a3b8;
+}
+
+.movie-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.movie-card:hover img {
+    transform: scale(1.1);
+}
+
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #000000, #5e2a8f); /* Dark to purple gradient */
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background-color: #1e293b;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #7c3aed;
+        }
+
+        .search-bar {
+            background-color: #334155;
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            width: 40%;
+            text-align: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .sign-in {
+            background-color: #7c3aed;
+            color: #fff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 6rem 1rem 2rem;
+            background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1;
+        }
+
+        .hero h1,
+        .hero p,
+        .hero .cta-button {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.2s;
+        }
+
+        .hero-search {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero-search-input {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .hero-search-button {
+            background-color: #7c3aed;
+            color: #fff;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .hero-search-button:hover {
+            background-color: #6d28d9;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .cta-button.secondary {
+            background-color: transparent;
+            border: 2px solid #7c3aed;
+        }
+
+        .cta-button.secondary:hover {
+            background-color: rgba(124, 58, 237, 0.1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero p {
+            animation: fadeInUp 1s ease-out 0.2s;
+        }
+
+        .hero .cta-button {
+            animation: fadeInUp 1s ease-out 0.4s;
+        }
+
+
+        .cta-button {
+            background-color: #7c3aed;
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        /* Add these styles to your existing CSS */
+.jamming-section {
+    padding: 2rem;
+    background-color: #1e293b;
+    margin: 2rem 5%;
+    border-radius: 12px;
+}
+
+.jamming-container {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.session-controls {
+    margin: 2rem 0;
+}
+
+.join-controls {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.jam-button {
+    background-color: #7c3aed;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.jam-button:hover {
+    background-color: #6d28d9;
+}
+
+#session-id {
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #334155;
+    color: white;
+    font-size: 1rem;
+    width: 200px;
+}
+
+.active-session {
+    margin-top: 2rem;
+}
+
+.session-info {
+    margin-bottom: 2rem;
+}
+
+.jamming-movie {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.movie-display {
+    margin-bottom: 2rem;
+}
+
+.movie-display img {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.swipe-controls {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.swipe-button {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+}
+
+.swipe-button:hover {
+    transform: scale(1.1);
+}
+
+#swipe-left {
+    background-color: #ef4444;
+    color: white;
+}
+
+#swipe-right {
+    background-color: #22c55e;
+    color: white;
+}
+
+.match-notification {
+    background-color: #22c55e;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+.hidden {
+    display: none;
+}
+
+#partner-status {
+    font-size: 1.2rem;
+}
+
+        .features {
+            padding: 4rem 5%;
+        }
+
+        .features h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background-color: #7c3aed;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        <!-- Movie Comment Section -->
+        <div class="comment-section">
+            <h3>Comments</h3>
+            <div id="comments-list">
+                <!-- Comments will be displayed here -->
+            </div>
+            <textarea id="comment-box" placeholder="Add a comment..."></textarea>
+            <button onclick="postComment()">Post Comment</button>
+        </div>
+
+#comments-list {
+    margin-bottom: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#comment-box {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 1rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #334155;
+    color: #fff;
+    font-size: 1rem;
+}
+
+button {
+    background-color: #7c3aed;
+    color: #fff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #6b2fa7;
+}
+
+
+
+        .how-it-works {
+            padding: 4rem 5%;
+            text-align: center;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .step-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #334155;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        footer {
+            background-color: #1e293b;
+            padding: 2rem 5%;
+            margin-top: 4rem;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .social-links a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .search-bar {
+                width: 80%;
+                margin: 1rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <span>Swipe</span> Movies
+        </a>
+        <input type="text" class="search-bar" placeholder="Search movies...">
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Explore</a>
+            <a href="#">About</a>
+        </div>
+        <a href="signin.html" class="sign-in">Sign In</a>
+    </nav>
+
+    
+    
+
+    <div class="hero">
+        <video autoplay muted loop id="hero-video">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-popcorn-falling-on-a-table-32900-large.mp4" type="video/mp4">
+        </video>
+        <div class="hero-content">
+            <h1 class="hero-title">Swipe Through Your Next Movie Adventure</h1>
+            <p class="hero-subtitle">Discover movies that match your mood. No more endless scrolling.</p>
+            <div class="hero-search">
+                
+            </div>
+            <div class="hero-cta">
+                <a href="trending.html" class="cta-button">Start Exploring</a>
+                <a href="moods.html" class="cta-button secondary">Explore by Mood</a>
+            </div>
+        </div>
+        <div class="particles"></div>
+    </div>
+
+    <div id="movie-container" class="movie-container">
+        <!-- Movie results will be displayed here -->
+    </div>
+
+    <!-- Add this new section after your hero section -->
+<div class="jamming-section">
+    <div class="jamming-container">
+        <h2>Movie Jamming Session</h2>
+        <div id="session-controls" class="session-controls">
+            <button id="create-session" class="jam-button">Create Session</button>
+            <div id="join-controls" class="join-controls">
+                <input type="text" id="session-id" placeholder="Enter Session ID">
+                <button id="join-session" class="jam-button">Join Session</button>
+            </div>
+        </div>
+        
+        <div id="active-session" class="active-session hidden">
+            <div class="session-info">
+                <h3>Session ID: <span id="current-session-id"></span></h3>
+                <p>Waiting for partner... <span id="partner-status">❌</span></p>
+            </div>
+            
+            <div id="jamming-movie" class="jamming-movie hidden">
+                <div class="movie-display">
+                    <img id="current-movie-poster" src="" alt="Movie Poster">
+                    <h3 id="current-movie-title"></h3>
+                    <p id="current-movie-year"></p>
+                </div>
+                <div class="swipe-controls">
+                    <button id="swipe-left" class="swipe-button">👎 Dislike</button>
+                    <button id="swipe-right" class="swipe-button">👍 Like</button>
+                </div>
+                <div id="match-notification" class="match-notification hidden">
+                    <h3>It's a Match! 🎉</h3>
+                    <p>Both of you liked: <span id="matched-movie"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+
+            </div>
+            <!-- Replace the existing features section with this updated version -->
+<div class="features">
+    <h2>Explore Movies Your Way</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">😊</div>
+            <a href="moods.html" class="cta-button">Go With Mood</a>
+            <p>Find movies that match how you feel</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🎬</div>
+            <a href="categories.html" class="cta-button">Categories</a>
+            <p>Browse by your favorite genres</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📈</div>
+            <a href="trending.html" class="cta-button">Trending</a>
+            <p>Discover popular movies right now</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <a href="community.html" class="cta-button">Community</a>
+            <p>Join discussions, share reviews, and connect with fellow movie lovers</p>
+            <div class="community-preview">
+                <div class="community-stats">
+                    <span>1.2K+ Members</span>
+                    <span>• </span>
+                    <span>500+ Discussions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add these styles to your existing CSS -->
+<style>
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .feature-card {
+        background-color: #1e293b;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-icon {
+        width: 48px;
+        height: 48px;
+        background-color: #7c3aed;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #fff;
+    }
+
+    .feature-card .cta-button {
+        display: inline-block;
+        background-color: #7c3aed;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        margin: 1rem 0;
+        transition: background-color 0.3s ease;
+    }
+
+    .feature-card .cta-button:hover {
+        background-color: #6d28d9;
+    }
+
+    .feature-card p {
+        color: #94a3b8;
+        margin-bottom: 1rem;
+    }
+
+    .community-preview {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #334155;
+    }
+
+    .community-stats {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    .community-stats span {
+        display: inline-block;
+    }
+
+    @media (max-width: 768px) {
+        .features-grid {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+        }
+    }
+</style>
+            </div>
+        </div>
+    </div>
+
+    <div class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-icon">→</div>
+                <h3>Swipe through movies</h3>
+                <p>Find movies that catch your interest</p>
+            </div>
+            <div class="step">
+                <div class="step-icon">▶</div>
+                <h3>Watch trailers & read bios</h3>
+                <p>Get to know more about each movie</p>
+            </div>
+            <div class="step">
+                <div class="step-icon">✓</div>
+                <h3>Pick your movie</h3>
+                <p>Found something you like? Time to watch!</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="social-links">
+            <a href="#">GitHub</a>
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+        </div>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Contact Us</a>
+        </div>
+        <p>&copy; 2024 Swipe Movies. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Add this JavaScript code to your existing script section
+        let socket;
+        let sessionId;
+        let currentMovie;
+        let matches = [];
+
+        // Initialize WebSocket connection
+        function initializeWebSocket() {
+            // Replace this URL with your actual WebSocket server URL
+            socket = new WebSocket('wss://your-websocket-server.com');
+            
+            socket.onopen = () => {
+                console.log('Connected to WebSocket server');
+            };
+            
+            socket.onmessage = (event) => {
+                handleWebSocketMessage(JSON.parse(event.data));
+            };
+            
+            socket.onclose = () => {
+                console.log('Disconnected from WebSocket server');
+            };
+        }
+
+        // Handle incoming WebSocket messages
+        function handleWebSocketMessage(message) {
+            switch(message.type) {
+                case 'session_created':
+                    handleSessionCreated(message.sessionId);
+                    break;
+                case 'partner_joined':
+                    handlePartnerJoined();
+                    break;
+                case 'new_movie':
+                    displayJammingMovie(message.movie);
+                    break;
+                case 'match':
+                    handleMatch(message.movie);
+                    break;
+                case 'partner_left':
+                    handlePartnerLeft();
+                    break;
+            }
+        }
+
+        // Create a new jamming session
+        document.getElementById('create-session').addEventListener('click', () => {
+            socket.send(JSON.stringify({
+                type: 'create_session'
+            }));
+        });
+
+        // Join an existing session
+        document.getElementById('join-session').addEventListener('click', () => {
+            const sessionIdInput = document.getElementById('session-id').value;
+            if (sessionIdInput) {
+                socket.send(JSON.stringify({
+                    type: 'join_session',
+                    sessionId: sessionIdInput
+                }));
+            }
+        });
+
+        // Handle session creation
+        function handleSessionCreated(newSessionId) {
+            sessionId = newSessionId;
+            document.getElementById('current-session-id').textContent = sessionId;
+            document.getElementById('session-controls').classList.add('hidden');
+            document.getElementById('active-session').classList.remove('hidden');
+        }
+
+        // Handle partner joining
+        function handlePartnerJoined() {
+            document.getElementById('partner-status').textContent = '✅';
+            document.getElementById('jamming-movie').classList.remove('hidden');
+            // Request first movie
+            requestNewMovie();
+        }
+
+        // Display movie for jamming
+        function displayJammingMovie(movie) {
+            currentMovie = movie;
+            document.getElementById('current-movie-poster').src = movie.Poster;
+            document.getElementById('current-movie-title').textContent = movie.Title;
+            document.getElementById('current-movie-year').textContent = movie.Year;
+        }
+
+        // Handle swipe actions
+        document.getElementById('swipe-left').addEventListener('click', () => {
+            sendSwipe('left');
+        });
+
+        document.getElementById('swipe-right').addEventListener('click', () => {
+            sendSwipe('right');
+        });
+
+        function sendSwipe(direction) {
+            socket.send(JSON.stringify({
+                type: 'swipe',
+                sessionId: sessionId,
+                movieId: currentMovie.imdbID,
+                direction: direction
+            }));
+        }
+
+        // Handle matches
+        function handleMatch(movie) {
+            matches.push(movie);
+            document.getElementById('matched-movie').textContent = movie.Title;
+            document.getElementById('match-notification').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('match-notification').classList.add('hidden');
+            }, 3000);
+        }
+
+        // Request a new movie
+        function requestNewMovie() {
+            socket.send(JSON.stringify({
+                type: 'request_movie',
+                sessionId: sessionId
+            }));
+        }
+
+        // Initialize WebSocket when page loads
+        initializeWebSocket();
+
+        const apiKey = "4272569c";  // Replace with your actual API key
+    
+        // Fetch movie details based on a search query
+        async function fetchMovies(query) {
+            const response = await fetch(`https://www.omdbapi.com/?s=${query}&apikey=${apiKey}`);
+            const data = await response.json();
+            displayMovies(data.Search);
+        }
+    
+        // Display movies on the page
+        function displayMovies(movies) {
+            const movieContainer = document.getElementById("movie-container");
+            movieContainer.innerHTML = ""; // Clear any previous movies
+
+            movies.forEach(movie => {
+                // Create movie card container
+                const movieCard = document.createElement("div");
+                movieCard.classList.add("movie-card");
+
+                // Create poster image with fallback
+                const posterUrl = movie.Poster !== "N/A" ? movie.Poster : "/api/placeholder/200/300";
+                
+                movieCard.innerHTML = `
+                    <div class="movie-poster">
+                        <img src="${posterUrl}" alt="${movie.Title}" />
+                        <div class="movie-actions">
+                            <button class="action-btn dislike" onclick="handleDislike('${movie.imdbID}')">
+                                <i>❌</i>
+                            </button>
+                            <button class="action-btn play" onclick="handleTrailer('${movie.imdbID}')">
+                                <i>▶️</i>
+                            </button>
+                            <button class="action-btn like" onclick="handleLike('${movie.imdbID}')">
+                                <i>❤️</i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="movie-info">
+                        <h3>${movie.Title}</h3>
+                        <p>${movie.Year}</p>
+                        <button class="details-btn" onclick="showMovieDetails('${movie.imdbID}')">
+                            More Details
+                        </button>
+                    </div>
+                `;
+                
+                movieContainer.appendChild(movieCard);
+            });
+        }
+
+        // Add these new action handler functions
+        async function handleLike(movieId) {
+            alert('Movie added to favorites!');
+        }
+
+        async function handleDislike(movieId) {
+            alert('Movie removed from recommendations');
+        }
+
+        async function handleTrailer(movieId) {
+            const response = await fetch(`https://www.omdbapi.com/?i=${movieId}&apikey=4272569c`);
+            const movieDetails = await response.json();
+            alert(`Playing trailer for ${movieDetails.Title}`);
+        }
+
+        async function showMovieDetails(movieId) {
+            const response = await fetch(`https://www.omdbapi.com/?i=${movieId}&apikey=4272569c`);
+            const movieDetails = await response.json();
+            
+            const modal = document.createElement('div');
+            modal.classList.add('movie-modal');
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h2>${movieDetails.Title}</h2>
+                    <img src="${movieDetails.Poster}" alt="${movieDetails.Title}" class="modal-poster">
+                    <div class="modal-details">
+                        <p><strong>Year:</strong> ${movieDetails.Year}</p>
+                        <p><strong>Rating:</strong> ${movieDetails.Rated}</p>
+                        <p><strong>Runtime:</strong> ${movieDetails.Runtime}</p>
+                        <p><strong>Genre:</strong> ${movieDetails.Genre}</p>
+                        <p><strong>Director:</strong> ${movieDetails.Director}</p>
+                        <p><strong>Cast:</strong> ${movieDetails.Actors}</p>
+                        <p><strong>Plot:</strong> ${movieDetails.Plot}</p>
+                        <p><strong>IMDB Rating:</strong> ${movieDetails.imdbRating}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+    
+        // Call the fetchMovies function when the user submits a search query
+        const searchInput = document.querySelector(".search-bar");
+        searchInput.addEventListener("input", (event) => {
+            const query = event.target.value;
+            if (query.length >= 1) {
+                fetchMovies(query);
+            }
+        });
+    </script>
+    
+</body>
+</html>

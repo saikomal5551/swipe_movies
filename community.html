@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Movies - Community</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #000000, #5e2a8f);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background-color: #1e293b;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #7c3aed;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #7c3aed;
+        }
+
+        .sign-in {
+            background-color: #7c3aed;
+            color: #fff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sign-in:hover {
+            background-color: #6d28d9;
+        }
+
+        .community-container {
+            max-width: 1200px;
+            margin: 100px auto 0;
+            padding: 2rem;
+        }
+
+        .create-post {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .create-post textarea {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: #334155;
+            color: #fff;
+            border: none;
+            margin-bottom: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .create-post textarea:focus {
+            outline: none;
+            background-color: #475569;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .post-type {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .post-type button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            background-color: #334155;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .post-type button:hover {
+            background-color: #475569;
+        }
+
+        .post-type button.active {
+            background-color: #7c3aed;
+        }
+
+        .submit-post {
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            background-color: #7c3aed;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-post:hover {
+            background-color: #6d28d9;
+        }
+
+        .posts-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            background-color: #1e293b;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .filter-button:hover {
+            background-color: #334155;
+        }
+
+        .filter-button.active {
+            background-color: #7c3aed;
+        }
+
+        .posts-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .post {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .post:hover {
+            transform: translateY(-2px);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .post-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #7c3aed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .post-timestamp {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .post-content {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .post-actions-bottom {
+            display: flex;
+            gap: 2rem;
+            color: #94a3b8;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .action-button:hover {
+            color: #7c3aed;
+        }
+
+        .comments-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #334155;
+        }
+
+        .comment {
+            padding: 1rem;
+            background-color: #334155;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .community-container {
+                padding: 1rem;
+            }
+
+            .post-actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .post-type {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .submit-post {
+                width: 100%;
+            }
+
+            .posts-filter {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <span>Swipe</span> Movies
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="explore.html">Explore</a>
+            <a href="community.html">Community</a>
+            <a href="about.html">About</a>
+        </div>
+        <a href="signin.html" class="sign-in">Sign In</a>
+    </nav>
+
+    <div class="community-container">
+        <div class="create-post">
+            <textarea placeholder="Share your thoughts about movies..."></textarea>
+            <div class="post-actions">
+                <div class="post-type">
+                    <button class="active">Discussion</button>
+                    <button>Review</button>
+                    <button>Recommendation</button>
+                </div>
+                <button class="submit-post">Post</button>
+            </div>
+        </div>
+
+        <div class="posts-filter">
+            <button class="filter-button active">All Posts</button>
+            <button class="filter-button">Discussions</button>
+            <button class="filter-button">Reviews</button>
+            <button class="filter-button">Recommendations</button>
+            <button class="filter-button">Trending</button>
+        </div>
+
+        <div class="posts-container">
+            <!-- Discussion Post -->
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-user">
+                        <div class="user-avatar">JD</div>
+                        <div>
+                            <h4>John Doe</h4>
+                            <span class="post-timestamp">2 hours ago</span>
+                        </div>
+                    </div>
+                    <span>Discussion</span>
+                </div>
+                <div class="post-content">
+                    <p>Just watched Inception for the first time! The ending left me speechless. What do you all think about the spinning top in the final scene? 🎬</p>
+                </div>
+                <div class="post-actions-bottom">
+                    <div class="action-button">
+                        <span>👍</span>
+                        <span>24 Likes</span>
+                    </div>
+                    <div class="action-button">
+                        <span>💬</span>
+                        <span>12 Comments</span>
+                    </div>
+                    <div class="action-button">
+                        <span>↗️</span>
+                        <span>Share</span>
+                    </div>
+                </div>
+                <div class="comments-section">
+                    <div class="comment">
+                        <div class="post-user">
+                            <div class="user-avatar">AS</div>
+                            <div>
+                                <h4>Alice Smith</h4>
+                                <p>I think it was deliberately ambiguous - that's what makes it so brilliant!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Post -->
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-user">
+                        <div class="user-avatar">SK</div>
+                        <div>
+                            <h4>Sarah Kim</h4>
+                            <span class="post-timestamp">5 hours ago</span>
+                        </div>
+                    </div>
+                    <span>Review</span>
+                </div>
+                <div class="post-content">
+                    <p>⭐⭐⭐⭐½ | "Dune: Part Two" exceeded all expectations. The visual effects are breathtaking, and the character development is phenomenal. Timothée Chalamet and Zendaya's chemistry really shines through. The sound design and Hans Zimmer's score create an immersive experience that pulls you deep into the world of Arrakis. A must-watch for sci-fi fans and newcomers alike!</p>
+                </div>
+                <div class="post-actions-bottom">
+                    <div class="action-button">
+                        <span>👍</span>
+                        <span>156 Likes</span>
+                    </div>
+                    <div class="action-button">
+                        <span>💬</span>
+                        <span>45 Comments</span>
+                    </div>
+                    <div class="action-button">
+                        <span>↗️</span>
+                        <span>Share</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation Post -->
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-user">
+                        <div class="user-avatar">MP</div>
+                        <div>
+                            <h4>Mike Peterson</h4>
+                            <span class="post-timestamp">1 day ago</span>
+                        </div>
+                    </div>
+                    <span>Recommendation</span>
+                </div>
+                <div class="post-content">
+                    <p>If you loved Everything Everywhere All at Once, you need to watch "The Fall" (2006). It's a visually stunning adventure that blends reality and fantasy in unique ways. The story follows an injured stuntman who tells elaborate tales to a young girl in a hospital. The cinematography is breathtaking, and like EEAAO, it explores deep emotional themes while taking you on a wild ride. 🎥</p>
+                </div>
+                <div class="post-actions-bottom">
+                    <div class="action-button">
+                        <span>👍</span>
+                        <span>89 Likes</span>
+                    </div>
+                    <div class="action-button">
+                        <span>💬</span>
+                        <span>23 Comments</span>
+                    </div>
+                    <div class="action-button">
+                        <span>↗️</span>
+                        <span>Share</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle post type buttons
+        const postTypeButtons = document.querySelectorAll('.post-type button');
+        postTypeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                postTypeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+
+        // Toggle filter buttons
+        const filterButtons = document.querySelectorAll('.filter-button');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+
+        // Like functionality
+        const likeButtons = document.querySelectorAll('.action-button');
+        likeButtons.forEach(button => {
+            let liked = false;
+            button.addEventListener('click', function() {
+                if (this.querySelector('span').textContent === '👍') {
+                    const likesCount = this.querySelector('span:last-child');
+                    const currentLikes = parseInt(likesCount.textContent);
+                    if (!liked) {
+                        likesCount.textContent = (currentLikes + 1) + ' Likes';
+                        liked = true;
+                    } else {
+                        likesCount.textContent = (currentLikes - 1) + ' Likes';
+                        liked = false;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

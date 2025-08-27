@@ -1,0 +1,19 @@
+{
+  "name": "movieswipe",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@clerk/clerk-react": "^5.21.0",
+    "node-fetch": "^3.3.2",
+    "react-router-dom": "^7.1.1",
+    "uuid": "^11.0.3",
+    "ws": "^8.18.0"
+  }
+}

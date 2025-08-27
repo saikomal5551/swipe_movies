@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Movies - Categories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #000000, #5e2a8f);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background-color: #1e293b;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #7c3aed;
+        }
+
+        .categories-container {
+            padding: 100px 5% 2rem;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .category-card {
+            position: relative;
+            height: 200px;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+        }
+
+        .category-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.7);
+            transition: filter 0.3s ease;
+        }
+
+        .category-card:hover .category-bg {
+            filter: brightness(0.5);
+        }
+
+        .category-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-count {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        /* Movie Swiper Styles */
+        .movie-swiper {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            padding: 80px 20px 20px;
+        }
+
+        .category-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .category-header h2 {
+            font-size: 2rem;
+            color: #7c3aed;
+        }
+
+        .movie-card-swiper {
+            position: relative;
+            width: 300px;
+            height: 500px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 15px;
+            overflow: hidden;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
+
+        .movie-poster-swiper {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+        }
+
+        .movie-info-swiper {
+            padding: 1rem;
+        }
+
+        .movie-title-swiper {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-details {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-plot {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .movie-actions {
+            position: absolute;
+            bottom: 1rem;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0 1rem;
+        }
+
+        .action-button {
+            padding: 0.75rem;
+            border-radius: 50%;
+            border: none;
+            background: #7c3aed;
+            color: white;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .action-button:hover {
+            transform: scale(1.1);
+        }
+
+        .action-button.dislike {
+            background: #ef4444;
+        }
+
+        .action-button.play {
+            background: #10b981;
+        }
+
+        .close-swiper {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 1001;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #334155;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .filter-button:hover {
+            background: #475569;
+        }
+
+        .filter-button.active {
+            background: #7c3aed;
+        }
+
+        @media (max-width: 768px) {
+            .categories-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .movie-card-swiper {
+                width: 280px;
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <span>Swipe</span> Movies
+        </a>
+    </nav>
+
+    <div class="categories-container">
+        <h1>Categories</h1>
+        <div class="categories-grid" id="categoriesGrid"></div>
+    </div>
+
+    <div class="movie-swiper" id="movieSwiper">
+        <button class="close-swiper" id="closeSwiper">×</button>
+        <div class="category-header">
+            <h2 id="categoryTitle"></h2>
+            <div class="filters">
+                <button class="filter-button active" data-filter="popular">Popular</button>
+                <button class="filter-button" data-filter="newest">Newest</button>
+                <button class="filter-button" data-filter="rating">Top Rated</button>
+            </div>
+        </div>
+        <div class="movie-card-swiper" id="currentMovie"></div>
+    </div>
+
+    <script>
+        const categories = [
+            { id: 'action', title: 'Action 🎬', background: '/api/placeholder/400/200', count: '350+ movies' },
+            { id: 'comedy', title: 'Comedy 😂', background: '/api/placeholder/400/200', count: '420+ movies' },
+            { id: 'drama', title: 'Drama 🎭', background: '/api/placeholder/400/200', count: '580+ movies' },
+            { id: 'horror', title: 'Horror 😱', background: '/api/placeholder/400/200', count: '250+ movies' },
+            { id: 'scifi', title: 'Sci-Fi 🚀', background: '/api/placeholder/400/200', count: '180+ movies' },
+            { id: 'romance', title: 'Romance ❤️', background: '/api/placeholder/400/200', count: '320+ movies' },
+            { id: 'documentary', title: 'Documentaries 📚', background: '/api/placeholder/400/200', count: '150+ movies' },
+            { id: 'trending', title: 'Trending Now 🔥', background: '/api/placeholder/400/200', count: '100+ movies' },
+            { id: 'family', title: 'Family 👪', background: '/api/placeholder/400/200', count: '280+ movies' }
+        ];
+
+        let currentMovieIndex = 0;
+        let currentMovies = [];
+        let currentCategory = null;
+
+        // Initialize categories grid
+        function initializeCategoriesGrid() {
+            const categoriesGrid = document.getElementById('categoriesGrid');
+            categories.forEach(category => {
+                const categoryCard = document.createElement('div');
+                categoryCard.className = 'category-card';
+                categoryCard.innerHTML = `
+                    <div class="category-bg" style="background-image: url(${category.background})"></div>
+                    <div class="category-content">
+                        <div class="category-title">${category.title}</div>
+                        <div class="category-count">${category.count}</div>
+                    </div>
+                `;
+                categoryCard.addEventListener('click', () => showMoviesForCategory(category));
+                categoriesGrid.appendChild(categoryCard);
+            });
+        }
+
+        async function showMoviesForCategory(category) {
+            currentCategory = category;
+            const movieSwiper = document.getElementById('movieSwiper');
+            const categoryTitle = document.getElementById('categoryTitle');
+            
+            movieSwiper.style.display = 'block';
+            categoryTitle.textContent = category.title;
+
+            // Fetch movies from OMDB API
+            try {
+                const response = await fetch(`https://www.omdbapi.com/?s=${category.id}&type=movie&apikey=4272569c`);
+                const data = await response.json();
+
+                if (data.Search) {
+                    currentMovies = data.Search;
+                    currentMovieIndex = 0;
+                    await showCurrentMovie();
+                }
+            } catch (error) {
+                console.error('Error fetching movies:', error);
+            }
+        }
+
+        async function showCurrentMovie() {
+            if (currentMovieIndex >= currentMovies.length) {
+                currentMovieIndex = 0;
+            }
+
+            const movie = currentMovies[currentMovieIndex];
+            const movieCard = document.getElementById('currentMovie');
+
+            try {
+                const response = await fetch(`https://www.omdbapi.com/?i=${movie.imdbID}&apikey=4272569c`);
+                const movieDetails = await response.json();
+
+                movieCard.innerHTML = `
+                    <img src="${movieDetails.Poster !== 'N/A' ? movieDetails.Poster : '/api/placeholder/300/450'}" 
+                         alt="${movieDetails.Title}" 
+                         class="movie-poster-swiper">
+                    <div class="movie-info-swiper">
+                        <div class="movie-title-swiper">${movieDetails.Title}</div>
+                        <div class="movie-details">
+                            ${movieDetails.Year} • ${movieDetails.Runtime}<br>
+                            ${movieDetails.Genre}
+                        </div>
+                        <div class="movie-plot">${movieDetails.Plot}</div>
+                    </div>
+                    <div class="movie-actions">
+                        <button class="action-button dislike" onclick="handleDislike()">👎</button>
+                        <button class="action-button play" onclick="handlePlay()">▶</button>
+                        <button class="action-button" onclick="handleLike()">👍</button>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error fetching movie details:', error);
+            }
+        }
+
+        function handleLike() {
+            // Add movie to liked list (implement with Firebase or local storage)
+            currentMovieIndex++;
+            showCurrentMovie();
+        }
+
+        function handleDislike() {
+            currentMovieIndex++;
+            showCurrentMovie();
+        }
+
+        function handlePlay() {
+            // Implement trailer playback or redirect to movie page
+            alert('Playing trailer... (implement trailer playback)');
+        }
+
+        // Setup event listeners
+        document.getElementById('closeSwiper').addEventListener('click', () => {
+            document.getElementById('movieSwiper').style.display = 'none';
+        });
+
+        // Handle swipe gestures
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.getElementById('currentMovie').addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.getElementById('currentMovie').addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipeGesture();
+        });
+
+        function handleSwipeGesture() {
+            const SWIPE_THRESHOLD = 50;
+            const difference = touchStartX - touchEndX;
+
+            if (Math.abs(difference) < SWIPE_THRESHOLD) return;
+
+            if (difference > 0) {
+                // Swiped left (dislike)
+                handleDislike();
+            } else {
+                // Swiped right (like)
+                handleLike();
+            }
+        }
+
+        // Filter buttons functionality
+        const filterButtons = document.querySelectorAll('.filter-button');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                // Implement filtering logic here
+                const filter = button.dataset.filter;
+                sortMovies(filter);
+            });
+        });
+
+        function sortMovies(filter) {
+            switch (filter) {
+                case 'newest':
+                    currentMovies.sort((a, b) => b.Year - a.Year);
+                    break;
+                case 'rating':
+                    // Implement rating-based sorting
+                    break;
+                case 'popular':
+                default:
+                    // Keep current order or implement popularity-based sorting
+                    break;
+            }
+            currentMovieIndex = 0;
+            showCurrentMovie();
+        }
+
+        // Initialize the page
+        initializeCategoriesGrid();
+    </script>
+</body>
+</html>

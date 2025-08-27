@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Movies - Trending</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #000000, #5e2a8f);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background-color: #1e293b;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #7c3aed;
+        }
+
+        .container {
+            padding: 100px 5% 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .movie-swiper {
+            margin: 2rem auto;
+            position: relative;
+            width: 300px;
+            height: 500px;
+            perspective: 1000px;
+        }
+
+        .movie-card {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: #1e293b;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: grab;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+        }
+
+        .movie-info {
+            padding: 1rem;
+        }
+
+        .movie-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .movie-meta {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-plot {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0 1rem;
+        }
+
+        .control-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-button:hover {
+            transform: scale(1.1);
+        }
+
+        .dislike {
+            background-color: #ef4444;
+        }
+
+        .play {
+            background-color: #10b981;
+        }
+
+        .like {
+            background-color: #7c3aed;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .filter-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #334155;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .filter-button:hover {
+            background: #475569;
+        }
+
+        .filter-button.active {
+            background: #7c3aed;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 80px 1rem 1rem;
+            }
+            
+            .movie-swiper {
+                width: 280px;
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <span>Swipe</span> Movies
+        </a>
+    </nav>
+
+    <div class="container">
+        <h1>Trending Movies</h1>
+        
+        <div class="filters">
+            <button class="filter-button active" data-filter="popular">Popular</button>
+            <button class="filter-button" data-filter="newest">Newest</button>
+            <button class="filter-button" data-filter="rating">Top Rated</button>
+        </div>
+
+        <div class="movie-swiper" id="movieSwiper">
+            <!-- Movie cards will be inserted here -->
+        </div>
+
+        <div class="controls">
+            <button class="control-button dislike" onclick="handleAction('dislike')">👎</button>
+            <button class="control-button play" onclick="handleAction('play')">▶</button>
+            <button class="control-button like" onclick="handleAction('like')">👍</button>
+        </div>
+    </div>
+
+    <script>
+        const OMDB_API_KEY = '4272569c';
+        let currentIndex = 0;
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+
+        // Sample trending movies (replace with actual API data)
+        const movies = [
+            "Inception",
+            "The Dark Knight",
+            "Interstellar",
+            "The Matrix",
+            "Pulp Fiction",
+            "Forrest Gump",
+            "The Shawshank Redemption",
+            "Fight Club",
+            "The Godfather",
+            "Goodfellas"
+        ];
+
+        async function fetchMovieDetails(title) {
+            try {
+                const response = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${OMDB_API_KEY}`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching movie:', error);
+                return null;
+            }
+        }
+
+        function createMovieCard(movie) {
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            card.innerHTML = `
+                <img src="${movie.Poster !== 'N/A' ? movie.Poster : '/api/placeholder/300/450'}" 
+                     alt="${movie.Title}" 
+                     class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">${movie.Title}</h3>
+                    <div class="movie-meta">
+                        ${movie.Year} • ${movie.Runtime}<br>
+                        ${movie.Genre}
+                    </div>
+                    <p class="movie-plot">${movie.Plot}</p>
+                </div>
+            `;
+
+            // Add touch/mouse events
+            card.addEventListener('mousedown', startDragging);
+            card.addEventListener('mousemove', drag);
+            card.addEventListener('mouseup', stopDragging);
+            card.addEventListener('mouseleave', stopDragging);
+            
+            card.addEventListener('touchstart', startDragging);
+            card.addEventListener('touchmove', drag);
+            card.addEventListener('touchend', stopDragging);
+
+            return card;
+        }
+
+        function startDragging(e) {
+            isDragging = true;
+            startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+            currentX = 0;
+            this.style.transition = 'none';
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            const x = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+            currentX = x - startX;
+            
+            const rotation = currentX / 10;
+            this.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
+        }
+
+        function stopDragging(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const card = document.querySelector('.movie-card');
+            card.style.transition = 'transform 0.3s ease';
+
+            if (Math.abs(currentX) > 100) {
+                // Swipe threshold met
+                const direction = currentX > 0 ? 'like' : 'dislike';
+                handleAction(direction);
+            } else {
+                // Reset position
+                card.style.transform = 'translateX(0) rotate(0deg)';
+            }
+        }
+
+        async function handleAction(action) {
+            const card = document.querySelector('.movie-card');
+            if (!card) return;
+
+            let transformValue = '0';
+            switch(action) {
+                case 'like':
+                    transformValue = '120vw';
+                    break;
+                case 'dislike':
+                    transformValue = '-120vw';
+                    break;
+                case 'play':
+                    alert('Playing trailer... (implement trailer functionality)');
+                    return;
+            }
+
+            card.style.transition = 'transform 0.5s ease';
+            card.style.transform = `translateX(${transformValue})`;
+
+            // Load next card after animation
+            setTimeout(() => {
+                card.remove();
+                loadNextMovie();
+            }, 500);
+        }
+
+        async function loadNextMovie() {
+            if (currentIndex >= movies.length) {
+                currentIndex = 0;
+            }
+
+            const movieData = await fetchMovieDetails(movies[currentIndex]);
+            if (movieData && movieData.Response === 'True') {
+                const card = createMovieCard(movieData);
+                document.getElementById('movieSwiper').appendChild(card);
+                currentIndex++;
+            }
+        }
+
+        // Filter functionality
+        document.querySelectorAll('.filter-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.filter-button').forEach(btn => 
+                    btn.classList.remove('active')
+                );
+                button.classList.add('active');
+                // Implement filter logic here
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadNextMovie);
+    </script>
+</body>
+</html>

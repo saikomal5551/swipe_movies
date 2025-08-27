@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Swipe Movies</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #000000, #5e2a8f);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background-color: #1e293b;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #7c3aed;
+        }
+
+        .auth-container {
+            max-width: 400px;
+            margin: 120px auto 40px;
+            padding: 2rem;
+            background-color: #1e293b;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #334155;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #7c3aed;
+            border-bottom: 2px solid #7c3aed;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background-color: #334155;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #7c3aed;
+        }
+
+        .auth-button {
+            background-color: #7c3aed;
+            color: #fff;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .auth-button:hover {
+            background-color: #6d28d9;
+        }
+
+        .forgot-password {
+            text-align: right;
+            color: #7c3aed;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .social-auth {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .social-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background-color: transparent;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .social-button:hover {
+            background-color: #334155;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            color: #94a3b8;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-color: #334155;
+        }
+
+        #signupForm {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <span>Swipe</span> Movies
+        </a>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-tabs">
+            <div class="tab active" onclick="switchTab('signin')">Sign In</div>
+            <div class="tab" onclick="switchTab('signup')">Sign Up</div>
+        </div>
+
+        <form id="signinForm" class="auth-form">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <a href="#" class="forgot-password">Forgot password?</a>
+            <button type="submit" class="auth-button">Sign In</button>
+
+            <div class="divider">or continue with</div>
+
+            <div class="social-auth">
+                <button type="button" class="social-button">
+                    Continue with Google
+                </button>
+                <button type="button" class="social-button">
+                    Continue with Facebook
+                </button>
+            </div>
+        </form>
+
+        <form id="signupForm" class="auth-form">
+            <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" required>
+            </div>
+            <div class="form-group">
+                <label for="signupEmail">Email</label>
+                <input type="email" id="signupEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <button type="submit" class="auth-button">Sign Up</button>
+        </form>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const signinForm = document.getElementById('signinForm');
+            const signupForm = document.getElementById('signupForm');
+            const tabs = document.querySelectorAll('.tab');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'signin') {
+                signinForm.style.display = 'flex';
+                signupForm.style.display = 'none';
+                tabs[0].classList.add('active');
+            } else {
+                signinForm.style.display = 'none';
+                signupForm.style.display = 'flex';
+                tabs[1].classList.add('active');
+            }
+        }
+
+        // Handle form submissions
+        document.getElementById('signinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add your sign-in logic here
+            console.log('Sign in submitted');
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add your sign-up logic here
+            console.log('Sign up submitted');
+        });
+    </script>
+</body>
+</html>

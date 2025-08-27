@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Movies - Movie Moods</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #000000, #5e2a8f);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background-color: #1e293b;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #7c3aed;
+        }
+
+        .mood-container {
+            padding: 100px 5% 2rem;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .mood-card {
+            background-color: #1e293b;
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .mood-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+        }
+
+        .mood-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .mood-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #7c3aed;
+        }
+
+        .mood-description {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        /* Movie Swiper Styles */
+        .movie-swiper {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            padding: 80px 20px 120px;
+            overflow-y: auto;
+        }
+
+        .selected-mood {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .selected-mood .mood-emoji {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .selected-mood .mood-title {
+            font-size: 1.5rem;
+            color: #7c3aed;
+        }
+
+        .movie-card-swiper {
+            position: relative;
+            width: 300px;
+            height: 500px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 15px;
+            overflow: hidden;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            cursor: grab;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .movie-card-swiper:active {
+            cursor: grabbing;
+        }
+
+        .movie-poster-swiper {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+        }
+
+        .movie-info-swiper {
+            padding: 1rem;
+        }
+
+        .movie-title-swiper {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-details {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-plot {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .swipe-buttons {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+            padding: 0 20px;
+        }
+
+        .swipe-button {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            background: #7c3aed;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .swipe-button.dislike {
+            background: #ef4444;
+        }
+
+        .swipe-button.play {
+            background: #10b981;
+        }
+
+        .swipe-button:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .close-swiper {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 201;
+        }
+
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1002;
+        }
+
+        .loading-spinner::after {
+            content: '';
+            width: 50px;
+            height: 50px;
+            border: 5px solid #7c3aed;
+            border-top: 5px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-more-movies {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .mood-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .movie-card-swiper {
+                width: 280px;
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <span>Swipe</span> Movies
+        </a>
+    </nav>
+
+    <div class="mood-container">
+        <h1>How are you feeling today?</h1>
+        <div class="mood-grid" id="moodGrid"></div>
+    </div>
+
+    <div class="movie-swiper" id="movieSwiper">
+        <button class="close-swiper" id="closeSwiper">×</button>
+        <div class="selected-mood" id="selectedMood"></div>
+        <div class="movie-card-swiper" id="currentMovie"></div>
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        <div class="no-more-movies" id="noMoreMovies">
+            No more movies for this mood. Try another mood!
+        </div>
+        <div class="swipe-buttons">
+            <button class="swipe-button dislike" id="dislikeButton">👎 Nope</button>
+            <button class="swipe-button play" id="playButton">▶ Play</button>
+            <button class="swipe-button" id="likeButton">👍 Like</button>
+        </div>
+    </div>
+
+    <script>
+        const OMDB_API_KEY = '4272569c';
+        
+        const moods = [
+            { emoji: "😊", title: "Happy", description: "Feel-good movies, comedies, romantic comedies", keywords: ["comedy", "feel-good", "happy"] },
+            { emoji: "😢", title: "Sad", description: "Drama, emotional stories, cathartic films", keywords: ["drama", "tear", "emotional"] },
+            { emoji: "🤩", title: "Excited", description: "Adventure, action-packed films, high-energy movies", keywords: ["action", "adventure", "thriller"] },
+            { emoji: "💕", title: "Romantic", description: "Romantic dramas, love stories, rom-coms", keywords: ["romance", "love", "romantic"] },
+            { emoji: "😌", title: "Chill", description: "Relaxing, light-hearted, slice-of-life movies", keywords: ["comedy", "family", "animation"] },
+            { emoji: "🤠", title: "Adventurous", description: "Thrillers, action-adventure, exploration films", keywords: ["adventure", "exploration", "action"] },
+            { emoji: "🌟", title: "Nostalgic", description: "Classics, old-time favorites, childhood movies", keywords: ["classic", "retro", "vintage"] },
+            { emoji: "🤔", title: "Curious", description: "Mysteries, documentaries, plot-twist movies", keywords: ["mystery", "documentary", "suspense"] },
+            { emoji: "💪", title: "Inspired", description: "Biographies, motivational, stories of resilience", keywords: ["biography", "inspiration", "motivation"] },
+            { emoji: "😱", title: "Scared", description: "Horror, thrillers, supernatural movies", keywords: ["horror", "thriller", "supernatural"] },
+            { emoji: "🥺", title: "Lonely", description: "Heartwarming films, movies with a strong sense of connection", keywords: ["drama", "friendship", "family"] },
+            { emoji: "😠", title: "Angry", description: "Action movies, revenge dramas, intense thrillers", keywords: ["action", "revenge", "thriller"] },
+            { emoji: "🤓", title: "Thoughtful", description: "Psychological dramas, mind-bending plots, indie films", keywords: ["psychological", "indie", "drama"] },
+            { emoji: "😂", title: "Laughing Out Loud", description: "Stand-up specials, slapstick comedies", keywords: ["comedy", "slapstick", "humor"] },
+            { emoji: "🤯", title: "Mind-Blown", description: "Sci-fi, futuristic themes, mind-twisting plots", keywords: ["sci-fi", "mind-bending", "future"] },
+            { emoji: "🔄", title: "Eager for More", description: "Cliffhanger films, sequels, ongoing franchises", keywords: ["sequel", "series", "franchise"] },
+            { emoji: "💫", title: "Empowered", description: "Strong character arcs, feminist or underdog stories", keywords: ["empowerment", "strong", "inspiration"] },
+            { emoji: "🌙", title: "Dark and Moody", description: "Noir films, dystopian stories, gothic vibes", keywords: ["noir", "dark", "gothic"] },
+            { emoji: "🌈", title: "Feel-Good", description: "Uplifting stories, musicals, positive vibes", keywords: ["musical", "uplifting", "positive"] },
+            { emoji: "🎬", title: "Cinematic", description: "Visual masterpieces, critically acclaimed films", keywords: ["acclaimed", "award", "masterpiece"] },
+            { emoji: "🎮", title: "Playful", description: "Animated films, family-friendly comedies", keywords: ["animation", "family", "fun"] },
+            { emoji: "👥", title: "Social", description: "Movies perfect for group watching or discussions", keywords: ["comedy", "ensemble", "group"] }
+        ];
+
+        let currentMovieIndex = 0;
+        let currentMovies = [];
+        let currentMood = null;
+        let isLoading = false;
+
+        // Initialize mood grid
+        function initializeMoodGrid() {
+            const moodGrid = document.getElementById('moodGrid');
+            moods.forEach(mood => {
+                const moodCard = document.createElement('div');
+                moodCard.className = 'mood-card';
+                moodCard.innerHTML = `
+                    <div class="mood-emoji">${mood.emoji}</div>
+                    <div class="mood-title">${mood.title}</div>
+                    <div class="mood-description">${mood.description}</div>
+                `;
+                moodCard.addEventListener('click', () => showMoviesForMood(mood));
+                moodGrid.appendChild(moodCard);
+            });
+        }
+
+        // Show loading spinner
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = show ? 'block' : 'none';
+            isLoading = show;
+        }
+
+        // Fetch detailed movie info
+        async function fetchMovieDetails(imdbId) {
+            try {
+                const response = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching movie details:', error);
+                return null;
+            }
+        }
+
+        // Show movies based on selected mood
+        async function showMoviesForMood(mood) {
+            currentMood = mood;
+            const movieSwiper = document.getElementById('movieSwiper');
+            const selectedMoodDiv = document.getElementById('selectedMood');
+            const noMoreMovies = document.getElementById('noMoreMovies');
+            
+            movieSwiper.style.display = 'block';
+            noMoreMovies.style.display = 'none';
+            showLoading(true);
+            
+            selectedMoodDiv.innerHTML = `
+                <div class="mood-emoji">${mood.emoji}</div>
+                <div class="mood-title">${mood.title}</div>
+            `;
+
+            currentMovieIndex = 0;
+            currentMovies = [];
+
+            try {
+                // Fetch movies for each keyword
+                const moviePromises = mood.keywords.map(keyword => 
+                    fetch(`https://www.omdbapi.com/?s=${keyword}&type=movie&apikey=${OMDB_API_KEY}`)
+                        .then(response => response.json())
+                );
+
+                const results = await Promise.all(moviePromises);
+                
+                // Combine and deduplicate movies
+                const allMovies = new Map();
+                results.forEach(result => {
+                    if (result.Search) {
+                        result.Search.forEach(movie => {
+                            if (!allMovies.has(movie.imdbID)) {
+                                allMovies.set(movie.imdbID, movie);
+                            }
+                        });
+                    }
+                });
+
+                currentMovies = Array.from(allMovies.values());
+                
+                // Shuffle the movies array
+                currentMovies.sort(() => Math.random() - 0.5);
+
+                if (currentMovies.length > 0) {
+                    await showCurrentMovie();
+                } else {
+                    noMoreMovies.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching movies:', error);
+                showLoading(false);
+            }
+        }
+
+        // Show the current movie in the swiper
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+
+        async function showCurrentMovie() {
+            if (currentMovieIndex >= currentMovies.length) {
+                const noMoreMovies = document.getElementById('noMoreMovies');
+                noMoreMovies.style.display = 'block';
+                return;
+            }
+
+            const currentMovie = currentMovies[currentMovieIndex];
+            const movieCard = document.getElementById('currentMovie');
+            const movieDetails = await fetchMovieDetails(currentMovie.imdbID);
+
+            if (movieDetails) {
+                movieCard.innerHTML = `
+                    <img src="${movieDetails.Poster}" alt="${movieDetails.Title}" class="movie-poster-swiper">
+                    <div class="movie-info-swiper">
+                        <div class="movie-title-swiper">${movieDetails.Title}</div>
+                        <div class="movie-details">${movieDetails.Year} | ${movieDetails.Genre}</div>
+                        <div class="movie-plot">${movieDetails.Plot}</div>
+                    </div>
+                `;
+
+                // Add drag event listeners
+                movieCard.addEventListener('mousedown', startDragging);
+                movieCard.addEventListener('mousemove', drag);
+                movieCard.addEventListener('mouseup', stopDragging);
+                movieCard.addEventListener('mouseleave', stopDragging);
+                
+                movieCard.addEventListener('touchstart', startDragging);
+                movieCard.addEventListener('touchmove', drag);
+                movieCard.addEventListener('touchend', stopDragging);
+            } else {
+                movieCard.innerHTML = `<p>Failed to load movie details</p>`;
+            }
+
+            showLoading(false);
+        }
+
+        function startDragging(e) {
+            isDragging = true;
+            startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+            currentX = 0;
+            this.style.transition = 'none';
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            const x = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+            currentX = x - startX;
+            
+            const rotation = currentX / 10;
+            this.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
+        }
+
+        function stopDragging(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const card = document.getElementById('currentMovie');
+            card.style.transition = 'transform 0.3s ease';
+
+            if (Math.abs(currentX) > 100) {
+                // Swipe threshold met
+                const direction = currentX > 0 ? 'like' : 'dislike';
+                handleSwipeAction(direction);
+            } else {
+                // Reset position
+                card.style.transform = 'translateX(0) rotate(0deg)';
+            }
+        }
+
+        function handleSwipeAction(action) {
+            const card = document.getElementById('currentMovie');
+            if (!card) return;
+
+            let transformValue = '0';
+            switch(action) {
+                case 'like':
+                    transformValue = '120vw';
+                    break;
+                case 'dislike':
+                    transformValue = '-120vw';
+                    break;
+            }
+
+            card.style.transition = 'transform 0.5s ease';
+            card.style.transform = `translateX(${transformValue})`;
+
+            // Remove event listeners from current card
+            card.removeEventListener('mousedown', startDragging);
+            card.removeEventListener('mousemove', drag);
+            card.removeEventListener('mouseup', stopDragging);
+            card.removeEventListener('mouseleave', stopDragging);
+            card.removeEventListener('touchstart', startDragging);
+            card.removeEventListener('touchmove', drag);
+            card.removeEventListener('touchend', stopDragging);
+
+            // Load next card after animation
+            setTimeout(() => {
+                // Reset card position and remove old content
+                card.style.transition = 'none';
+                card.style.transform = 'translateX(0) rotate(0deg)';
+                card.innerHTML = '';
+                
+                // Load next movie
+                currentMovieIndex++;
+                if (currentMovieIndex < currentMovies.length) {
+                    showCurrentMovie();
+                } else {
+                    const noMoreMovies = document.getElementById('noMoreMovies');
+                    noMoreMovies.style.display = 'block';
+                }
+            }, 500);
+        }
+
+        // Handle like button click
+        document.getElementById('likeButton').addEventListener('click', () => {
+            currentMovieIndex++;
+            showCurrentMovie();
+        });
+
+        // Handle dislike button click
+        document.getElementById('dislikeButton').addEventListener('click', () => {
+            currentMovieIndex++;
+            showCurrentMovie();
+        });
+
+        // Close the movie swiper
+        document.getElementById('closeSwiper').addEventListener('click', () => {
+            const movieSwiper = document.getElementById('movieSwiper');
+            movieSwiper.style.display = 'none';
+        });
+
+        // Initialize the mood grid
+        initializeMoodGrid();
+    </script>
+</body>
+</html>
